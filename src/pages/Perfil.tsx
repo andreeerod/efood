@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
-import { brl, restaurantes, type Prato } from '../data'
+import { brl, type Prato } from '../data'
+import { useRestaurantes } from '../api'
 import { Botao, Container, cores } from '../styles'
 import { adicionar } from '../store/cart'
 import type { RootState } from '../store'
@@ -27,10 +28,13 @@ const Modal = styled.div`background:${cores.rosa};color:#fff;display:flex;gap:24
 
 export default function Perfil() {
   const { id } = useParams()
+  const { restaurantes, carregando, erro } = useRestaurantes()
   const r = restaurantes.find(x => x.id === Number(id))
   const dispatch = useDispatch()
   const qtd = useSelector((s: RootState) => s.cart.itens.length)
   const [sel, setSel] = useState<Prato | null>(null)
+  if (carregando) return <Container><p style={{ padding: 40 }}>Carregando...</p></Container>
+  if (erro) return <Container><p style={{ padding: 40 }}>{erro} <Link to="/">Voltar</Link></p></Container>
   if (!r) return <Container><p style={{ padding: 40 }}>Restaurante não encontrado. <Link to="/">Voltar</Link></p></Container>
   return (<>
     <Topo><Container style={{ width: '100%' }}><div className="in"><Link to="/" style={{ color: cores.rosa }}>Restaurantes</Link><span className="logo" style={{ color: cores.rosa }}>efood</span><Link to="/carrinho" style={{ color: cores.rosa }}>{qtd} produto(s) no carrinho</Link></div></Container></Topo>

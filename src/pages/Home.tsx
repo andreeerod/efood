@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { restaurantes } from '../data'
+import { useRestaurantes } from '../api'
 import { Botao, Container, cores } from '../styles'
 
 const Hero = styled.header`
@@ -23,12 +23,13 @@ const Rodape = styled.footer`background:${cores.bege};text-align:center;padding:
   .logo{font-size:32px;font-weight:900;margin-bottom:32px}`
 
 export default function Home() {
+  const { restaurantes, carregando, erro } = useRestaurantes()
   return (<>
     <Hero><div className="logo">efood</div><h1>Viva experiências gastronômicas no conforto da sua casa</h1></Hero>
-    <Container><Lista>{restaurantes.map(r => (
+    <Container>{carregando && <p style={{ padding: 80 }}>Carregando...</p>}{erro && <p style={{ padding: 80 }}>{erro}</p>}<Lista>{restaurantes.map(r => (
       <Card key={r.id}>
         <img src={r.capa} alt={r.titulo} />
-        <div className="tags">{r.destaque && <span className="tag">Destaque da semana</span>}<span className="tag">{r.tipo}</span></div>
+        <div className="tags">{r.destacado && <span className="tag">Destaque da semana</span>}<span className="tag">{r.tipo}</span></div>
         <div className="info">
           <div className="linha"><span>{r.titulo}</span><span>{r.avaliacao} ★</span></div>
           <p>{r.descricao}</p>
