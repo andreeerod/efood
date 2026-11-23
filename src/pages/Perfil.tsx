@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { brl, restaurantes, type Prato } from '../data'
 import { Botao, Container, cores } from '../styles'
+import { adicionar } from '../store/cart'
+import type { RootState } from '../store'
 
 const Topo = styled.header`background:${cores.bege};height:186px;display:flex;align-items:center;
   .in{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:900;font-size:18px}
@@ -25,17 +28,19 @@ const Modal = styled.div`background:${cores.rosa};color:#fff;display:flex;gap:24
 export default function Perfil() {
   const { id } = useParams()
   const r = restaurantes.find(x => x.id === Number(id))
+  const dispatch = useDispatch()
+  const qtd = useSelector((s: RootState) => s.cart.itens.length)
   const [sel, setSel] = useState<Prato | null>(null)
   if (!r) return <Container><p style={{ padding: 40 }}>Restaurante não encontrado. <Link to="/">Voltar</Link></p></Container>
   return (<>
-    <Topo><Container style={{ width: '100%' }}><div className="in"><Link to="/" style={{ color: cores.rosa }}>Restaurantes</Link><span className="logo" style={{ color: cores.rosa }}>efood</span><span>0 produto(s) no carrinho</span></div></Container></Topo>
+    <Topo><Container style={{ width: '100%' }}><div className="in"><Link to="/" style={{ color: cores.rosa }}>Restaurantes</Link><span className="logo" style={{ color: cores.rosa }}>efood</span><Link to="/carrinho" style={{ color: cores.rosa }}>{qtd} produto(s) no carrinho</Link></div></Container></Topo>
     <Banner $img={r.capa}><Container style={{ height: '100%' }}><div className="in"><span className="tipo">{r.tipo}</span><span>{r.titulo}</span></div></Container></Banner>
     <Container><Grade>{r.cardapio.map(p => (
       <Item key={p.id}><img src={p.foto} alt={p.nome} /><h3>{p.nome}</h3><p>{p.descricao.slice(0, 120)}...</p><Botao onClick={() => setSel(p)}>Adicionar ao carrinho</Botao></Item>))}</Grade></Container>
     {sel && <Fundo onClick={() => setSel(null)}><Modal onClick={e => e.stopPropagation()}>
       <button className="x" onClick={() => setSel(null)} aria-label="Fechar">✕</button>
       <img src={sel.foto} alt={sel.nome} />
-      <div><h3>{sel.nome}</h3><p>{sel.descricao}</p><p>Serve: {sel.porcao}</p><Botao>Adicionar ao carrinho - {brl(sel.preco)}</Botao></div>
+      <div><h3>{sel.nome}</h3><p>{sel.descricao}</p><p>Serve: {sel.porcao}</p><Botao onClick={() => { dispatch(adicionar({ prato: sel, restaurante: r.id })); setSel(null) }}>Adicionar ao carrinho - {brl(sel.preco)}</Botao></div>
     </Modal></Fundo>}
   </>)
 }
