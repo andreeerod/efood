@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { brl } from '../data'
@@ -20,6 +20,7 @@ const Total = styled.div`display:flex;justify-content:space-between;font-weight:
 export default function Carrinho() {
   const itens = useSelector((s: RootState) => s.cart.itens)
   const dispatch = useDispatch()
+  const navigate = useNavigate()
   const total = itens.reduce((soma, i) => soma + i.preco, 0)
   return (<>
     <Topo><Container style={{ width: '100%' }}><div className="in"><Link to="/" style={{ color: cores.rosa }}>Restaurantes</Link><span className="logo" style={{ color: cores.rosa }}>efood</span><span>{itens.length} produto(s) no carrinho</span></div></Container></Topo>
@@ -31,7 +32,7 @@ export default function Carrinho() {
             <Linha key={i.uid}><img src={i.foto} alt={i.nome} /><div><h3>{i.nome}</h3><p>{brl(i.preco)}</p></div>
               <button className="rm" aria-label={`Remover ${i.nome}`} onClick={() => dispatch(remover(i.uid))}>🗑</button></Linha>))}</Lista>
           <Total><span>Valor total: {brl(total)}</span>
-            <div className="acoes"><Botao onClick={() => dispatch(limpar())}>Esvaziar carrinho</Botao></div></Total>
+            <div className="acoes"><Botao onClick={() => dispatch(limpar())}>Esvaziar carrinho</Botao><Botao onClick={() => navigate('/checkout')}>Continuar com a entrega</Botao></div></Total>
         </>}
     </Container>
   </>)
