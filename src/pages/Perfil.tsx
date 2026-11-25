@@ -1,50 +1,215 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
+import Header from '../components/Header'
 import { brl, type Prato } from '../data'
-import { useRestaurantes } from '../api'
-import { Botao, Container, cores } from '../styles'
+import { useRestaurantes } from '../hooks/useRestaurantes'
+import { breakpoints, Botao, Container, cores, Mensagem } from '../styles'
 import { adicionar } from '../store/cart'
-import type { RootState } from '../store'
+import { useAppDispatch } from '../store'
 
-const Topo = styled.header`background:${cores.bege};height:186px;display:flex;align-items:center;
-  .in{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:900;font-size:18px}
-  .logo{font-size:36px;letter-spacing:-2px}`
-const Banner = styled.div<{ $img: string }>`height:280px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),url(${p => p.$img}) center/cover;color:#fff;
-  .in{height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:24px 16px;font-size:32px;font-weight:900}
-  .tipo{font-weight:100;font-size:32px}`
-const Grade = styled.ul`display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:32px;padding:56px 0 120px`
-const Item = styled.li`background:${cores.rosa};color:${cores.bege};padding:8px;
-  img{width:100%;height:167px;object-fit:cover;display:block}
-  h3{margin:8px 0;font-size:16px}p{font-size:14px;line-height:22px;margin-bottom:8px}
-  button{width:100%;padding:4px 0}`
-const Fundo = styled.div`position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10`
-const Modal = styled.div`background:${cores.rosa};color:#fff;display:flex;gap:24px;padding:32px;max-width:1024px;width:100%;position:relative;
-  img{width:280px;height:280px;object-fit:cover}
-  h3{font-size:18px;margin-bottom:16px}p{font-size:14px;line-height:22px;margin-bottom:16px}
-  .x{position:absolute;top:8px;right:8px;background:none;border:0;color:#fff;font-size:20px;cursor:pointer}
-  @media(max-width:700px){flex-direction:column;img{width:100%}}`
+const Banner = styled.div<{ $img: string }>`
+  height: 280px;
+  background: linear-gradient(rgba(0, 0, 0, .55), rgba(0, 0, 0, .55)), url(${p => p.$img}) center / cover;
+  color: ${cores.branco};
+
+  .in { height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 24px 0 32px }
+  .tipo { font-weight: 100; font-size: 32px }
+  h1 { font-size: 32px; font-weight: 900 }
+
+  @media (max-width: ${breakpoints.celular}) {
+    height: 200px;
+    .tipo { font-size: 22px }
+    h1 { font-size: 26px }
+  }
+`
+
+const Grade = styled.ul`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  padding: 56px 0 120px;
+
+  @media (max-width: ${breakpoints.tablet}) { grid-template-columns: repeat(2, 1fr); gap: 24px }
+  @media (max-width: ${breakpoints.celular}) { grid-template-columns: 1fr; padding: 32px 0 64px }
+`
+
+const Item = styled.li`
+  background: ${cores.rosa};
+  color: ${cores.bege};
+  padding: 8px 8px 12px;
+  display: flex;
+  flex-direction: column;
+
+  img { width: 100%; height: 167px; object-fit: cover; display: block }
+  .cabeca { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 8px 0 }
+  h3 { font-size: 16px; font-weight: 900 }
+  .preco { font-size: 16px; font-weight: 900; white-space: nowrap }
+  p {
+    font-size: 14px;
+    line-height: 22px;
+    margin-bottom: 16px;
+    flex: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+`
+
+const Fundo = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 10;
+  overflow-y: auto;
+`
+
+const Modal = styled.div`
+  background: ${cores.rosa};
+  color: ${cores.branco};
+  display: flex;
+  gap: 24px;
+  padding: 32px;
+  max-width: 1024px;
+  width: 100%;
+  position: relative;
+  margin: auto;
+
+  img { width: 280px; height: 280px; object-fit: cover; flex-shrink: 0 }
+  .texto { display: flex; flex-direction: column; align-items: flex-start }
+  h3 { font-size: 18px; font-weight: 900; margin-bottom: 16px }
+  p { font-size: 14px; line-height: 22px; margin-bottom: 16px }
+  .x { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: none; border: 0; color: ${cores.branco}; font-size: 20px; cursor: pointer }
+
+  @media (max-width: 700px) {
+    flex-direction: column;
+    padding: 40px 16px 16px;
+    img { width: 100%; height: 220px }
+    .texto button { width: 100% }
+  }
+`
+
+const Aviso = styled.div`
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: ${cores.texto};
+  color: ${cores.branco};
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  z-index: 20;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
+
+  a { color: ${cores.bege}; text-decoration: underline; white-space: nowrap }
+`
 
 export default function Perfil() {
   const { id } = useParams()
   const { restaurantes, carregando, erro } = useRestaurantes()
-  const r = restaurantes.find(x => x.id === Number(id))
-  const dispatch = useDispatch()
-  const qtd = useSelector((s: RootState) => s.cart.itens.length)
+  const dispatch = useAppDispatch()
   const [sel, setSel] = useState<Prato | null>(null)
-  if (carregando) return <Container><p style={{ padding: 40 }}>Carregando...</p></Container>
-  if (erro) return <Container><p style={{ padding: 40 }}>{erro} <Link to="/">Voltar</Link></p></Container>
-  if (!r) return <Container><p style={{ padding: 40 }}>Restaurante não encontrado. <Link to="/">Voltar</Link></p></Container>
-  return (<>
-    <Topo><Container style={{ width: '100%' }}><div className="in"><Link to="/" style={{ color: cores.rosa }}>Restaurantes</Link><span className="logo" style={{ color: cores.rosa }}>efood</span><Link to="/carrinho" style={{ color: cores.rosa }}>{qtd} produto(s) no carrinho</Link></div></Container></Topo>
-    <Banner $img={r.capa}><Container style={{ height: '100%' }}><div className="in"><span className="tipo">{r.tipo}</span><span>{r.titulo}</span></div></Container></Banner>
-    <Container><Grade>{r.cardapio.map(p => (
-      <Item key={p.id}><img src={p.foto} alt={p.nome} /><h3>{p.nome}</h3><p>{p.descricao.slice(0, 120)}...</p><Botao onClick={() => setSel(p)}>Adicionar ao carrinho</Botao></Item>))}</Grade></Container>
-    {sel && <Fundo onClick={() => setSel(null)}><Modal onClick={e => e.stopPropagation()}>
-      <button className="x" onClick={() => setSel(null)} aria-label="Fechar">✕</button>
-      <img src={sel.foto} alt={sel.nome} />
-      <div><h3>{sel.nome}</h3><p>{sel.descricao}</p><p>Serve: {sel.porcao}</p><Botao onClick={() => { dispatch(adicionar({ prato: sel, restaurante: r.id })); setSel(null) }}>Adicionar ao carrinho - {brl(sel.preco)}</Botao></div>
-    </Modal></Fundo>}
-  </>)
+  const [aviso, setAviso] = useState('')
+
+  // Fecha o modal com Esc e trava a rolagem da página enquanto ele está aberto
+  useEffect(() => {
+    if (!sel) return
+    const fechar = (e: KeyboardEvent) => e.key === 'Escape' && setSel(null)
+    document.addEventListener('keydown', fechar)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', fechar)
+      document.body.style.overflow = ''
+    }
+  }, [sel])
+
+  useEffect(() => {
+    if (!aviso) return
+    const t = setTimeout(() => setAviso(''), 3000)
+    return () => clearTimeout(t)
+  }, [aviso])
+
+  const r = restaurantes.find(x => x.id === Number(id))
+
+  const comprar = (prato: Prato) => {
+    if (!r) return
+    dispatch(adicionar({ prato, restaurante: r.id }))
+    setSel(null)
+    setAviso(`${prato.nome} adicionado ao carrinho`)
+  }
+
+  let conteudo
+  if (carregando) conteudo = <Container><Mensagem>Carregando cardápio...</Mensagem></Container>
+  else if (erro) conteudo = <Container><Mensagem role="alert">{erro} <Link to="/">Voltar</Link></Mensagem></Container>
+  else if (!r) conteudo = <Container><Mensagem>Restaurante não encontrado. <Link to="/">Voltar</Link></Mensagem></Container>
+  else
+    conteudo = (
+      <>
+        <Banner $img={r.capa}>
+          <Container style={{ height: '100%' }}>
+            <div className="in">
+              <span className="tipo">{r.tipo}</span>
+              <h1>{r.titulo}</h1>
+            </div>
+          </Container>
+        </Banner>
+        <Container>
+          <Grade>
+            {r.cardapio.map(p => (
+              <Item key={p.id}>
+                <img src={p.foto} alt={p.nome} loading="lazy" />
+                <div className="cabeca">
+                  <h3>{p.nome}</h3>
+                  <span className="preco">{brl(p.preco)}</span>
+                </div>
+                <p>{p.descricao}</p>
+                <Botao $variante="compra" $cheio onClick={() => setSel(p)}>
+                  🛒 Adicionar ao carrinho
+                </Botao>
+              </Item>
+            ))}
+          </Grade>
+        </Container>
+      </>
+    )
+
+  return (
+    <>
+      <Header />
+      {conteudo}
+      {sel && (
+        <Fundo onClick={() => setSel(null)}>
+          <Modal role="dialog" aria-modal="true" aria-label={sel.nome} onClick={e => e.stopPropagation()}>
+            <button className="x" onClick={() => setSel(null)} aria-label="Fechar">✕</button>
+            <img src={sel.foto} alt={sel.nome} />
+            <div className="texto">
+              <h3>{sel.nome}</h3>
+              <p>{sel.descricao}</p>
+              <p>Serve: {sel.porcao}</p>
+              <Botao $variante="compra" onClick={() => comprar(sel)} autoFocus>
+                🛒 Adicionar ao carrinho - {brl(sel.preco)}
+              </Botao>
+            </div>
+          </Modal>
+        </Fundo>
+      )}
+      {aviso && (
+        <Aviso role="status">
+          <span>{aviso}</span>
+          <Link to="/carrinho">Ver carrinho</Link>
+        </Aviso>
+      )}
+    </>
+  )
 }
