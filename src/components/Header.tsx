@@ -1,16 +1,19 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import { breakpoints, Container, cores } from '../styles'
+import { breakpoints, Container } from '../styles'
 import { texturaTalheres } from '../styles'
 import { useAppDispatch, useAppSelector } from '../store'
 import { abrir } from '../store/cart'
 import LogoEfood from './LogoEfood'
 
+// Topo do Perfil: 162px, logo a 40px do topo, links 18px black
 const Topo = styled.header`
   ${texturaTalheres}
-  padding: 48px 0;
+  background-position: left 1px;
+  height: 162px;
+  padding-top: 40px;
 
-  @media (max-width: ${breakpoints.celular}) { padding: 24px 0 }
+  @media (max-width: ${breakpoints.celular}) { height: auto; padding: 24px 0 }
 `
 
 const Linha = styled.div`
@@ -20,9 +23,11 @@ const Linha = styled.div`
   gap: 16px;
   font-weight: 900;
   font-size: 18px;
+  line-height: 21px;
 
   .voltar { justify-self: start }
   .carrinho { justify-self: end }
+  .voltar, .carrinho { position: relative; top: 1px }
 
   @media (max-width: ${breakpoints.celular}) {
     grid-template-columns: 1fr auto;
@@ -32,34 +37,17 @@ const Linha = styled.div`
   }
 `
 
-export const Logo = styled(Link)`
+const Logo = styled(Link)`
   display: block;
 `
 
-const LinkCarrinho = styled.button`
+const BotaoCarrinho = styled.button`
   background: none;
   border: 0;
   color: inherit;
   font: inherit;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
-  .qtd {
-    min-width: 28px;
-    height: 28px;
-    padding: 0 6px;
-    border-radius: 14px;
-    background: ${cores.rosa};
-    color: ${cores.creme};
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-  }
-
-  &:hover .texto { text-decoration: underline }
+  text-align: right;
 `
 
 export default function Header() {
@@ -71,10 +59,9 @@ export default function Header() {
         <Linha>
           <Link className="voltar" to="/">Restaurantes</Link>
           <Logo className="logo" to="/" aria-label="efood - página inicial"><LogoEfood /></Logo>
-          <LinkCarrinho className="carrinho" type="button" onClick={() => dispatch(abrir())} aria-label={`Carrinho com ${qtd} produto(s)`}>
-            <span className="qtd">{qtd}</span>
-            <span className="texto">produto(s) no carrinho</span>
-          </LinkCarrinho>
+          <BotaoCarrinho className="carrinho" type="button" onClick={() => dispatch(abrir())}>
+            {qtd} produto(s) no carrinho
+          </BotaoCarrinho>
         </Linha>
       </Container>
     </Topo>

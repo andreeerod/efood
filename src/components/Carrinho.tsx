@@ -14,7 +14,7 @@ const Fundo = styled.div`
   display: flex;
   justify-content: flex-end;
 
-  .overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .7) }
+  .overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .8) }
 `
 
 const Lateral = styled.aside`
@@ -39,8 +39,8 @@ const Item = styled.li`
   gap: 8px;
 
   img { width: 80px; height: 80px; object-fit: cover; flex-shrink: 0 }
-  h3 { font-size: 18px; font-weight: 900; margin-bottom: 16px }
-  p { font-size: 14px }
+  h3 { font-size: 18px; line-height: 21px; font-weight: 900; margin-bottom: 16px }
+  p { font-size: 14px; line-height: 22px }
 
   .rm {
     position: absolute;
@@ -61,6 +61,7 @@ const Total = styled.div`
   display: flex;
   justify-content: space-between;
   font-size: 14px;
+  line-height: 16px;
   font-weight: 700;
   margin: 40px 0 16px;
 `

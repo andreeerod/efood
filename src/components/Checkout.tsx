@@ -11,17 +11,44 @@ type Entrega = { receiver: string; description: string; city: string; zipCode: s
 type Pagamento = { name: string; number: string; code: string; month: string; year: string }
 type Etapa = 'entrega' | 'pagamento' | 'confirmacao'
 
-const Titulo = styled.h2`font-size:16px;font-weight:700;margin-bottom:16px`
-const Texto = styled.p`font-size:14px;line-height:22px;margin-bottom:24px`
-const Campo = styled.label`display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:700;margin-bottom:8px;flex:1;min-width:0;
-  input{width:100%;height:32px;border:2px solid ${cores.bege};background:${cores.bege};color:#4B4B4B;padding:0 8px;font-size:14px;font-weight:700;outline:none}
-  input:focus{border-color:#4B4B4B}
-  input[aria-invalid=true]{border-color:#FFB930}`
-const Linha = styled.div`display:flex;gap:24px;&.cartao label:first-child{flex:2.4}
-  @media(max-width:360px){flex-direction:column;gap:0}`
-const Acoes = styled.div`display:flex;flex-direction:column;gap:8px;margin-top:24px`
+// Medidas do Figma: título 16/19, rótulos 14/16 bold, campos de 32px e 8px entre eles
+const Titulo = styled.h2`font-size: 16px; line-height: 19px; font-weight: 700; margin-bottom: 16px`
+const Texto = styled.p`font-size: 14px; line-height: 22px; & + & { margin-top: 22px }`
+const Campo = styled.label`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 8px;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 700;
+
+  input {
+    width: 100%;
+    height: 32px;
+    border: 0;
+    background: ${cores.bege};
+    color: ${cores.texto};
+    padding: 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    outline: none;
+  }
+  input:focus { box-shadow: inset 0 0 0 2px ${cores.texto} }
+  input[aria-invalid=true] { box-shadow: inset 0 0 0 2px ${cores.alerta} }
+`
+const Linha = styled.div<{ $colunas: string; $gap: number }>`
+  display: grid;
+  grid-template-columns: ${p => p.$colunas};
+  column-gap: ${p => p.$gap}px;
+  margin-bottom: 8px;
+
+  label { margin-bottom: 0 }
+`
+const Acoes = styled.div`display: flex; flex-direction: column; gap: 8px; margin-top: 24px`
 const Voltar = styled(Botao).attrs({ $cheio: true })``
-const Erro = styled.p`background:${cores.bege};color:${cores.rosa};padding:8px;font-weight:700;font-size:14px;margin:16px 0 0 !important`
+const Erro = styled.p`background: ${cores.bege}; color: ${cores.rosa}; padding: 8px; font-weight: 700; font-size: 14px; margin-top: 16px`
 
 const so = (v: string) => v.replace(/\D/g, '')
 
@@ -123,8 +150,8 @@ export default function Checkout({ onVoltar, onConcluir }: Props) {
             <Campo>Quem irá receber<input {...ent('receiver')} aria-invalid={inv('receiver')} autoComplete="name" /></Campo>
             <Campo>Endereço<input {...ent('description')} aria-invalid={inv('description')} autoComplete="street-address" /></Campo>
             <Campo>Cidade<input {...ent('city')} aria-invalid={inv('city')} autoComplete="address-level2" /></Campo>
-            <Linha>
-              <Campo>CEP<input {...ent('zipCode')} aria-invalid={inv('zipCode')} inputMode="numeric" placeholder="00000-000" maxLength={9} autoComplete="postal-code" /></Campo>
+            <Linha $colunas="1fr 1fr" $gap={34}>
+              <Campo>CEP<input {...ent('zipCode')} aria-invalid={inv('zipCode')} inputMode="numeric" maxLength={9} autoComplete="postal-code" /></Campo>
               <Campo>Número<input {...ent('number')} aria-invalid={inv('number')} inputMode="numeric" /></Campo>
             </Linha>
             <Campo>Complemento (opcional)<input {...ent('complement')} /></Campo>
@@ -140,18 +167,18 @@ export default function Checkout({ onVoltar, onConcluir }: Props) {
           <form onSubmit={finalizar} noValidate>
             <Titulo>Pagamento - Valor a pagar {brl(total)}</Titulo>
             <Campo>Nome no cartão<input {...pag('name')} aria-invalid={inv('name')} autoComplete="cc-name" /></Campo>
-            <Linha className="cartao">
+            <Linha $colunas="1fr 87px" $gap={30}>
               <Campo>Número do cartão<input {...pag('number')} aria-invalid={inv('cardNumber')} inputMode="numeric" maxLength={19} autoComplete="cc-number" /></Campo>
               <Campo>CVV<input {...pag('code')} aria-invalid={inv('code')} inputMode="numeric" maxLength={4} autoComplete="cc-csc" /></Campo>
             </Linha>
-            <Linha>
-              <Campo>Mês de vencimento<input {...pag('month')} aria-invalid={inv('month')} inputMode="numeric" maxLength={2} placeholder="MM" autoComplete="cc-exp-month" /></Campo>
-              <Campo>Ano de vencimento<input {...pag('year')} aria-invalid={inv('year')} inputMode="numeric" maxLength={4} placeholder="AAAA" autoComplete="cc-exp-year" /></Campo>
+            <Linha $colunas="1fr 1fr" $gap={34}>
+              <Campo>Mês de vencimento<input {...pag('month')} aria-invalid={inv('month')} inputMode="numeric" maxLength={2} autoComplete="cc-exp-month" /></Campo>
+              <Campo>Ano de vencimento<input {...pag('year')} aria-invalid={inv('year')} inputMode="numeric" maxLength={4} autoComplete="cc-exp-year" /></Campo>
             </Linha>
             {invalidos.length > 0 && <Erro role="alert">Confira os campos destacados.</Erro>}
             {erro && <Erro role="alert">{erro}</Erro>}
             <Acoes>
-              <Botao $cheio type="submit" disabled={enviando}>{enviando ? 'Enviando pedido...' : `Finalizar pagamento - ${brl(total)}`}</Botao>
+              <Botao $cheio type="submit" disabled={enviando}>{enviando ? 'Enviando pedido...' : 'Finalizar pagamento'}</Botao>
               <Voltar type="button" onClick={() => { setInvalidos([]); setEtapa('entrega') }}>Voltar para a edição de endereço</Voltar>
             </Acoes>
           </form>
@@ -160,11 +187,13 @@ export default function Checkout({ onVoltar, onConcluir }: Props) {
         {etapa === 'confirmacao' && (
           <div>
             <Titulo>Pedido realizado - {pedido}</Titulo>
-            <Texto>Estamos felizes em informar que seu pedido já está em processo de preparação e, em breve, será entregue para {entrega.receiver.trim()} em {entrega.description.trim()}, {so(entrega.number)}{entrega.complement.trim() ? ` (${entrega.complement.trim()})` : ''} - {entrega.city.trim()}.</Texto>
-            <Texto>Lembre-se de que nossos entregadores não estão autorizados a realizar cobranças extras.</Texto>
-            <Texto>Para garantir a segurança e a qualidade do seu pedido, higienize as mãos antes de recebê-lo.</Texto>
-            <Texto>Esperamos que tenha uma ótima refeição. Bom apetite!</Texto>
-            <Botao $cheio type="button" onClick={concluir}>Concluir</Botao>
+            <Texto>Estamos felizes em informar que seu pedido já está em processo de preparação e, em breve, será entregue no endereço fornecido.</Texto>
+            <Texto>Gostaríamos de ressaltar que nossos entregadores não estão autorizados a realizar cobranças extras.</Texto>
+            <Texto>Lembre-se da importância de higienizar as mãos após o recebimento do pedido, garantindo assim sua segurança e bem-estar durante a refeição.</Texto>
+            <Texto>Esperamos que desfrute de uma deliciosa e agradável experiência gastronômica. Bom apetite!</Texto>
+            <Acoes>
+              <Botao $cheio type="button" onClick={concluir}>Concluir</Botao>
+            </Acoes>
           </div>
         )}
       </>
