@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { breakpoints, Container, cores } from '../styles'
+import { texturaTalheres } from '../styles'
 import { useAppSelector } from '../store'
 import LogoEfood from './LogoEfood'
 
 const Topo = styled.header`
-  background: ${cores.bege};
+  ${texturaTalheres}
   padding: 48px 0;
 
   @media (max-width: ${breakpoints.celular}) { padding: 24px 0 }

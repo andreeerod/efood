@@ -3,9 +3,10 @@ import LogoEfood from '../components/LogoEfood'
 import styled from 'styled-components'
 import { useRestaurantes } from '../hooks/useRestaurantes'
 import { breakpoints, Container, cores, Mensagem } from '../styles'
+import { texturaTalheres } from '../styles'
 
 const Hero = styled.header`
-  background: ${cores.bege};
+  ${texturaTalheres}
   text-align: center;
   padding: 64px 16px 40px;
   min-height: 384px;

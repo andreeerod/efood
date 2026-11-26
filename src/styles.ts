@@ -77,3 +77,12 @@ export const Mensagem = styled.p`
 
   a { text-decoration: underline; font-weight: 700 }
 `
+
+// Textura de garfo e faca do fundo dos topos (Figma)
+const talher = `<svg xmlns='http://www.w3.org/2000/svg' width='53' height='67' viewBox='0 0 53 67'><g fill='none' stroke='%23E66767' stroke-width='2' stroke-opacity='.12' stroke-linecap='round' stroke-linejoin='round'><path d='M18 8v8a4 4 0 0 0 8 0V8M22 8v8M22 20v22a2 2 0 0 0 4 0V20'/><path d='M34 8c4 2 5 8 5 14h-3v20a2 2 0 0 1-4 0V9'/></g></svg>`
+
+export const texturaTalheres = `
+  background-color: ${cores.bege};
+  background-image: url("data:image/svg+xml,${talher.replace(/</g, '%3C').replace(/>/g, '%3E')}");
+  background-repeat: repeat;
+`
