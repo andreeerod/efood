@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import LogoEfood from '../components/LogoEfood'
 import styled from 'styled-components'
 import { useRestaurantes } from '../hooks/useRestaurantes'
 import { breakpoints, Container, cores, Mensagem } from '../styles'
@@ -14,7 +15,7 @@ const Hero = styled.header`
   justify-content: space-between;
   gap: 48px;
 
-  .logo { font-size: 42px; font-weight: 900; letter-spacing: -2px }
+  .logo { display: flex; justify-content: center }
   h1 { font-size: 36px; font-weight: 900; max-width: 540px; line-height: 1.2 }
 
   @media (max-width: ${breakpoints.celular}) {
@@ -71,7 +72,7 @@ export default function Home() {
   return (
     <>
       <Hero>
-        <div className="logo">efood</div>
+        <div className="logo"><LogoEfood /></div>
         <h1>Viva experiências gastronômicas no conforto da sua casa</h1>
       </Hero>
       <Container>

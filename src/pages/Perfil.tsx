@@ -42,9 +42,7 @@ const Item = styled.li`
   flex-direction: column;
 
   img { width: 100%; height: 167px; object-fit: cover; display: block }
-  .cabeca { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 8px 0 }
-  h3 { font-size: 16px; font-weight: 900 }
-  .preco { font-size: 16px; font-weight: 900; white-space: nowrap }
+  h3 { font-size: 16px; font-weight: 900; margin: 8px 0 }
   p {
     font-size: 14px;
     line-height: 22px;
@@ -169,13 +167,10 @@ export default function Perfil() {
             {r.cardapio.map(p => (
               <Item key={p.id}>
                 <img src={p.foto} alt={p.nome} loading="lazy" />
-                <div className="cabeca">
-                  <h3>{p.nome}</h3>
-                  <span className="preco">{brl(p.preco)}</span>
-                </div>
+                <h3>{p.nome}</h3>
                 <p>{p.descricao}</p>
-                <Botao $variante="compra" $cheio onClick={() => setSel(p)}>
-                  🛒 Adicionar ao carrinho
+                <Botao $cheio onClick={() => setSel(p)}>
+                  Adicionar ao carrinho
                 </Botao>
               </Item>
             ))}

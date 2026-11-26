@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { breakpoints, Container, cores } from '../styles'
 import { useAppSelector } from '../store'
+import LogoEfood from './LogoEfood'
 
 const Topo = styled.header`
   background: ${cores.bege};
@@ -30,10 +31,7 @@ const Linha = styled.div`
 `
 
 export const Logo = styled(Link)`
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: -2px;
-  color: ${cores.rosa};
+  display: block;
 `
 
 const LinkCarrinho = styled(Link)`
@@ -64,7 +62,7 @@ export default function Header() {
       <Container>
         <Linha>
           <Link className="voltar" to="/">Restaurantes</Link>
-          <Logo className="logo" to="/">efood</Logo>
+          <Logo className="logo" to="/" aria-label="efood - página inicial"><LogoEfood /></Logo>
           <LinkCarrinho className="carrinho" to="/carrinho" aria-label={`Carrinho com ${qtd} produto(s)`}>
             <span className="qtd">{qtd}</span>
             <span className="texto">produto(s) no carrinho</span>
