@@ -1,11 +1,10 @@
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import styled from 'styled-components'
 import { Global } from './styles'
 import Footer from './components/Footer'
 import Home from './pages/Home'
 import Perfil from './pages/Perfil'
-import Carrinho from './pages/Carrinho'
-import Checkout from './pages/Checkout'
+import Carrinho from './components/Carrinho'
 
 const Pagina = styled.div`
   min-height: 100vh;
@@ -23,11 +22,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/restaurante/:id" element={<Perfil />} />
-          <Route path="/carrinho" element={<Carrinho />} />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
       <Footer />
+      <Carrinho />
     </Pagina>
   )
 }

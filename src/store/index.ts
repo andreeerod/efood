@@ -6,7 +6,7 @@ const CHAVE = 'efood:carrinho'
 
 export const store = configureStore({
   reducer: { cart },
-  preloadedState: { cart: { itens: carregarCarrinho(CHAVE) } }
+  preloadedState: { cart: { itens: carregarCarrinho(CHAVE), aberto: false } }
 })
 
 // Mantém o carrinho salvo ao recarregar a página

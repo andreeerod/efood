@@ -3,7 +3,7 @@ import type { Prato } from '../data'
 
 export type ItemCarrinho = Prato & { restaurante: number; uid: string }
 
-type CartState = { itens: ItemCarrinho[] }
+type CartState = { itens: ItemCarrinho[]; aberto: boolean }
 
 export function carregarCarrinho(chave: string): ItemCarrinho[] {
   try {
@@ -15,7 +15,7 @@ export function carregarCarrinho(chave: string): ItemCarrinho[] {
   }
 }
 
-const initialState: CartState = { itens: [] }
+const initialState: CartState = { itens: [], aberto: false }
 
 const slice = createSlice({
   name: 'cart',
@@ -30,9 +30,15 @@ const slice = createSlice({
     },
     limpar: state => {
       state.itens = []
+    },
+    abrir: state => {
+      state.aberto = true
+    },
+    fechar: state => {
+      state.aberto = false
     }
   }
 })
 
-export const { adicionar, remover, limpar } = slice.actions
+export const { adicionar, remover, limpar, abrir, fechar } = slice.actions
 export default slice.reducer

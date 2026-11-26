@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { breakpoints, Container, cores } from '../styles'
 import { texturaTalheres } from '../styles'
-import { useAppSelector } from '../store'
+import { useAppDispatch, useAppSelector } from '../store'
+import { abrir } from '../store/cart'
 import LogoEfood from './LogoEfood'
 
 const Topo = styled.header`
@@ -35,7 +36,12 @@ export const Logo = styled(Link)`
   display: block;
 `
 
-const LinkCarrinho = styled(Link)`
+const LinkCarrinho = styled.button`
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -58,13 +64,14 @@ const LinkCarrinho = styled(Link)`
 
 export default function Header() {
   const qtd = useAppSelector(s => s.cart.itens.length)
+  const dispatch = useAppDispatch()
   return (
     <Topo>
       <Container>
         <Linha>
           <Link className="voltar" to="/">Restaurantes</Link>
           <Logo className="logo" to="/" aria-label="efood - página inicial"><LogoEfood /></Logo>
-          <LinkCarrinho className="carrinho" to="/carrinho" aria-label={`Carrinho com ${qtd} produto(s)`}>
+          <LinkCarrinho className="carrinho" type="button" onClick={() => dispatch(abrir())} aria-label={`Carrinho com ${qtd} produto(s)`}>
             <span className="qtd">{qtd}</span>
             <span className="texto">produto(s) no carrinho</span>
           </LinkCarrinho>

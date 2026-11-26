@@ -5,7 +5,7 @@ import Header from '../components/Header'
 import { brl, type Prato } from '../data'
 import { useRestaurantes } from '../hooks/useRestaurantes'
 import { breakpoints, Botao, Container, cores, Mensagem } from '../styles'
-import { adicionar } from '../store/cart'
+import { abrir, adicionar } from '../store/cart'
 import { useAppDispatch } from '../store'
 
 const Banner = styled.div<{ $img: string }>`
@@ -92,33 +92,11 @@ const Modal = styled.div`
   }
 `
 
-const Aviso = styled.div`
-  position: fixed;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%);
-  background: ${cores.texto};
-  color: ${cores.branco};
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 700;
-  display: flex;
-  gap: 16px;
-  align-items: center;
-  z-index: 20;
-  width: max-content;
-  max-width: calc(100% - 32px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .25);
-
-  a { color: ${cores.bege}; text-decoration: underline; white-space: nowrap }
-`
-
 export default function Perfil() {
   const { id } = useParams()
   const { restaurantes, carregando, erro } = useRestaurantes()
   const dispatch = useAppDispatch()
   const [sel, setSel] = useState<Prato | null>(null)
-  const [aviso, setAviso] = useState('')
 
   // Fecha o modal com Esc e trava a rolagem da página enquanto ele está aberto
   useEffect(() => {
@@ -132,11 +110,6 @@ export default function Perfil() {
     }
   }, [sel])
 
-  useEffect(() => {
-    if (!aviso) return
-    const t = setTimeout(() => setAviso(''), 3000)
-    return () => clearTimeout(t)
-  }, [aviso])
 
   const r = restaurantes.find(x => x.id === Number(id))
 
@@ -144,7 +117,7 @@ export default function Perfil() {
     if (!r) return
     dispatch(adicionar({ prato, restaurante: r.id }))
     setSel(null)
-    setAviso(`${prato.nome} adicionado ao carrinho`)
+    dispatch(abrir())
   }
 
   let conteudo
@@ -192,18 +165,12 @@ export default function Perfil() {
               <h3>{sel.nome}</h3>
               <p>{sel.descricao}</p>
               <p>Serve: {sel.porcao}</p>
-              <Botao $variante="compra" onClick={() => comprar(sel)} autoFocus>
-                🛒 Adicionar ao carrinho - {brl(sel.preco)}
+              <Botao onClick={() => comprar(sel)} autoFocus>
+                Adicionar ao carrinho - {brl(sel.preco)}
               </Botao>
             </div>
           </Modal>
         </Fundo>
-      )}
-      {aviso && (
-        <Aviso role="status">
-          <span>{aviso}</span>
-          <Link to="/carrinho">Ver carrinho</Link>
-        </Aviso>
       )}
     </>
   )

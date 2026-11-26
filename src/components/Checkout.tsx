@@ -1,9 +1,7 @@
 import { type ChangeEvent, type FormEvent, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import Header from '../components/Header'
 import { brl } from '../data'
-import { breakpoints, Botao, Container, cores } from '../styles'
+import { Botao, cores } from '../styles'
 import { limpar } from '../store/cart'
 import { selecionarItens, selecionarTotal, useAppDispatch, useAppSelector } from '../store'
 
@@ -13,27 +11,26 @@ type Entrega = { receiver: string; description: string; city: string; zipCode: s
 type Pagamento = { name: string; number: string; code: string; month: string; year: string }
 type Etapa = 'entrega' | 'pagamento' | 'confirmacao'
 
-const Painel = styled.section`background:${cores.rosa};color:${cores.bege};max-width:400px;margin:56px auto 120px;padding:32px 16px;
-  @media(max-width:${breakpoints.celular}){margin:24px auto 64px}
-  h2{font-size:16px;font-weight:700;margin-bottom:16px}
-  p{font-size:14px;line-height:22px;margin-bottom:24px}`
+const Titulo = styled.h2`font-size:16px;font-weight:700;margin-bottom:16px`
+const Texto = styled.p`font-size:14px;line-height:22px;margin-bottom:24px`
 const Campo = styled.label`display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:700;margin-bottom:8px;flex:1;min-width:0;
   input{width:100%;height:32px;border:2px solid ${cores.bege};background:${cores.bege};color:#4B4B4B;padding:0 8px;font-size:14px;font-weight:700;outline:none}
   input:focus{border-color:#4B4B4B}
   input[aria-invalid=true]{border-color:#FFB930}`
 const Linha = styled.div`display:flex;gap:24px;&.cartao label:first-child{flex:2.4}
   @media(max-width:360px){flex-direction:column;gap:0}`
-const Acoes = styled.div`display:flex;flex-direction:column;gap:12px;margin-top:24px`
-const Voltar = styled.button`background:none;border:0;color:${cores.bege};font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer;padding:8px`
+const Acoes = styled.div`display:flex;flex-direction:column;gap:8px;margin-top:24px`
+const Voltar = styled(Botao).attrs({ $cheio: true })``
 const Erro = styled.p`background:${cores.bege};color:${cores.rosa};padding:8px;font-weight:700;font-size:14px;margin:16px 0 0 !important`
 
 const so = (v: string) => v.replace(/\D/g, '')
 
-export default function Checkout() {
+type Props = { onVoltar: () => void; onConcluir: () => void }
+
+export default function Checkout({ onVoltar, onConcluir }: Props) {
   const itens = useAppSelector(selecionarItens)
   const total = useAppSelector(selecionarTotal)
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
 
   const [etapa, setEtapa] = useState<Etapa>('entrega')
   const [entrega, setEntrega] = useState<Entrega>({ receiver: '', description: '', city: '', zipCode: '', number: '', complement: '' })
@@ -42,8 +39,6 @@ export default function Checkout() {
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState('')
   const [pedido, setPedido] = useState('')
-
-  if (itens.length === 0 && etapa !== 'confirmacao') return <Navigate to="/carrinho" replace />
 
   const validarEntrega = () => {
     const ruins: string[] = []
@@ -113,20 +108,18 @@ export default function Checkout() {
 
   const concluir = () => {
     dispatch(limpar())
-    navigate('/')
+    onConcluir()
   }
 
   const inv = (n: string) => invalidos.includes(n)
   const ent = (k: keyof Entrega) => ({ value: entrega[k], onChange: (e: ChangeEvent<HTMLInputElement>) => setEntrega({ ...entrega, [k]: e.target.value }) })
   const pag = (k: keyof Pagamento) => ({ value: pagamento[k], onChange: (e: ChangeEvent<HTMLInputElement>) => setPagamento({ ...pagamento, [k]: e.target.value }) })
 
-  return (<>
-    <Header />
-    <Container>
-      <Painel>
+  return (
+      <>
         {etapa === 'entrega' && (
           <form onSubmit={irParaPagamento} noValidate>
-            <h2>Entrega</h2>
+            <Titulo>Entrega</Titulo>
             <Campo>Quem irá receber<input {...ent('receiver')} aria-invalid={inv('receiver')} autoComplete="name" /></Campo>
             <Campo>Endereço<input {...ent('description')} aria-invalid={inv('description')} autoComplete="street-address" /></Campo>
             <Campo>Cidade<input {...ent('city')} aria-invalid={inv('city')} autoComplete="address-level2" /></Campo>
@@ -137,15 +130,15 @@ export default function Checkout() {
             <Campo>Complemento (opcional)<input {...ent('complement')} /></Campo>
             {invalidos.length > 0 && <Erro role="alert">Confira os campos destacados.</Erro>}
             <Acoes>
-              <Botao $variante="compra" $cheio type="submit">Continuar com o pagamento</Botao>
-              <Voltar type="button" onClick={() => navigate('/carrinho')}>Voltar para o carrinho</Voltar>
+              <Botao $cheio type="submit">Continuar com o pagamento</Botao>
+              <Voltar type="button" onClick={onVoltar}>Voltar para o carrinho</Voltar>
             </Acoes>
           </form>
         )}
 
         {etapa === 'pagamento' && (
           <form onSubmit={finalizar} noValidate>
-            <h2>Pagamento - Valor a pagar {brl(total)}</h2>
+            <Titulo>Pagamento - Valor a pagar {brl(total)}</Titulo>
             <Campo>Nome no cartão<input {...pag('name')} aria-invalid={inv('name')} autoComplete="cc-name" /></Campo>
             <Linha className="cartao">
               <Campo>Número do cartão<input {...pag('number')} aria-invalid={inv('cardNumber')} inputMode="numeric" maxLength={19} autoComplete="cc-number" /></Campo>
@@ -158,7 +151,7 @@ export default function Checkout() {
             {invalidos.length > 0 && <Erro role="alert">Confira os campos destacados.</Erro>}
             {erro && <Erro role="alert">{erro}</Erro>}
             <Acoes>
-              <Botao $variante="compra" $cheio type="submit" disabled={enviando}>{enviando ? 'Enviando pedido...' : `Finalizar pagamento - ${brl(total)}`}</Botao>
+              <Botao $cheio type="submit" disabled={enviando}>{enviando ? 'Enviando pedido...' : `Finalizar pagamento - ${brl(total)}`}</Botao>
               <Voltar type="button" onClick={() => { setInvalidos([]); setEtapa('entrega') }}>Voltar para a edição de endereço</Voltar>
             </Acoes>
           </form>
@@ -166,15 +159,14 @@ export default function Checkout() {
 
         {etapa === 'confirmacao' && (
           <div>
-            <h2>Pedido realizado - {pedido}</h2>
-            <p>Estamos felizes em informar que seu pedido já está em processo de preparação e, em breve, será entregue para {entrega.receiver.trim()} em {entrega.description.trim()}, {so(entrega.number)}{entrega.complement.trim() ? ` (${entrega.complement.trim()})` : ''} - {entrega.city.trim()}.</p>
-            <p>Lembre-se de que nossos entregadores não estão autorizados a realizar cobranças extras.</p>
-            <p>Para garantir a segurança e a qualidade do seu pedido, higienize as mãos antes de recebê-lo.</p>
-            <p>Esperamos que tenha uma ótima refeição. Bom apetite!</p>
-            <Botao $variante="compra" $cheio type="button" onClick={concluir}>Concluir</Botao>
+            <Titulo>Pedido realizado - {pedido}</Titulo>
+            <Texto>Estamos felizes em informar que seu pedido já está em processo de preparação e, em breve, será entregue para {entrega.receiver.trim()} em {entrega.description.trim()}, {so(entrega.number)}{entrega.complement.trim() ? ` (${entrega.complement.trim()})` : ''} - {entrega.city.trim()}.</Texto>
+            <Texto>Lembre-se de que nossos entregadores não estão autorizados a realizar cobranças extras.</Texto>
+            <Texto>Para garantir a segurança e a qualidade do seu pedido, higienize as mãos antes de recebê-lo.</Texto>
+            <Texto>Esperamos que tenha uma ótima refeição. Bom apetite!</Texto>
+            <Botao $cheio type="button" onClick={concluir}>Concluir</Botao>
           </div>
         )}
-      </Painel>
-    </Container>
-  </>)
+      </>
+  )
 }
